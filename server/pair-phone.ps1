@@ -11,11 +11,11 @@ function Run-Adb([string[]]$Arguments) {
     & adb -s $Serial @Arguments
     if($LASTEXITCODE -ne 0) {throw '手机连接操作未完成。'}
 }
-Run-Adb @('shell','am','force-stop','com.daystep.app')
+Run-Adb @('shell','am','force-stop','com.routine')
 Run-Adb @('reverse','tcp:8787','tcp:8787')
-Run-Adb @('push',(Join-Path $PSScriptRoot 'connection.json'),'/data/local/tmp/daystep-connection.json')
-Run-Adb @('shell','run-as','com.daystep.app','mkdir','-p','files')
-Run-Adb @('shell','run-as','com.daystep.app','cp','/data/local/tmp/daystep-connection.json','files/connection.json')
-Run-Adb @('shell','rm','/data/local/tmp/daystep-connection.json')
-Run-Adb @('shell','am','start','-W','-n','com.daystep.app/.MainActivity','--ez','open_settings','true')
+Run-Adb @('push',(Join-Path $PSScriptRoot 'connection.json'),'/data/local/tmp/routine-connection.json')
+Run-Adb @('shell','run-as','com.routine','mkdir','-p','files')
+Run-Adb @('shell','run-as','com.routine','cp','/data/local/tmp/routine-connection.json','files/connection.json')
+Run-Adb @('shell','rm','/data/local/tmp/routine-connection.json')
+Run-Adb @('shell','am','start','-W','-n','com.routine/.MainActivity','--ez','open_settings','true')
 Write-Output '手机已连接 AI 服务。请在设置的“模型与密钥”中填写 API 密钥。'

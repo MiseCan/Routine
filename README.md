@@ -1,10 +1,12 @@
-# 日序 Daystep
+# Routine
 
 通过 AI 对话，把目标拆成每天能执行的任务。Android 手机独立运行，直接连接 DeepSeek，无需电脑或 USB。
 
-[下载最新版](https://github.com/MiseCan/daystep/releases/latest) · [下载 v0.12.0 APK](https://github.com/MiseCan/daystep/releases/download/v0.12.0/Daystep-0.12.0.apk)
+[下载与历史版本](https://github.com/MiseCan/Routine/releases)
 
-支持 Android 8.0 及以上。目前发布的是**调试签名的内测 APK**，尚未制作正式签名构建。
+当前版本为 **Routine 0.16.2**，应用 ID 和源码命名空间均为 `com.routine`，签名相同时可覆盖升级 0.15.0。历史旧包名应用的计划、聊天和 API 密钥不会自动迁入。
+
+支持 Android 12（API 31）及以上。目前发布的是**调试签名的内测 APK**，尚未制作正式签名构建。
 
 ## 功能
 
@@ -41,7 +43,7 @@
 
 ## 构建
 
-需要 JDK 17+、Android SDK 37；项目使用 Gradle 9.8.1、Android Gradle Plugin 9.4.1、Compose 编译器插件 2.4.21、Material 3 1.5.0-beta01。配置 `ANDROID_HOME`，或在本机 `local.properties` 中设置 SDK 路径。
+需要 JDK 21+、Android SDK 37；项目使用 Gradle 9.8.1、Android Gradle Plugin 9.4.1、Compose 编译器插件 2.4.21、Material 3 1.5.0-beta01、Miuix Nav 0.9.4。配置 `ANDROID_HOME`，或在本机 `local.properties` 中设置 SDK 路径。
 
 macOS / Linux：
 
@@ -55,9 +57,15 @@ Windows：
 .\gradlew.bat :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ```
 
-安装包输出到 `app/build/outputs/apk/debug/app-debug.apk`。也可使用 Android Studio 打开项目。
+全量包输出到 `app/build/outputs/apk/debug/app-debug.apk`。使用 `:app:assemblePhone` 构建 R8 裁剪包，输出到 `app/build/outputs/apk/phone/app-phone.apk`。Windows 上可运行 `./build.ps1 -Install` 构建并安装裁剪包。
 
 ## 验证与参考
+
+0.16.0 修正看板固定模块过多、聊天键盘留白和 AI 推荐选项空值报错，见[修正记录与验证范围](docs/UI_AND_AI_FIXES_2026-11-06.md)。
+
+本地 0.14.0 直接使用 Miuix Nav 的 `NavDisplay` 和内置分层侧滑，页面遮罩、圆角及手势物理由库处理。看板与 AI 聊天是同一个根条目下的同级标签，原位淡入淡出；设置、关于和计划详情才压入返回栈。已删除旧版自写页面转场。详情及验证范围见[转场说明](MOTION.md)。GitHub 下载链接仍指向已发布版本。
+
+0.13.0 的架构检查与修正包括 ViewModel + StateFlow、Navigation Compose、长列表按需加载和七天计划预览，见[检查记录与官方源码来源](docs/ANDROIDX_REVIEW_2026-11-05.md)。
 
 v0.12.0 已通过构建、静态检查及 **152 项自动测试**，覆盖计划格式、重复规则展开、完成记录、单会话存储、操作校验和提示词隔离。测试使用固定数据，不调用付费模型；该版本尚未进行实机或真实 AI 对话验证。
 

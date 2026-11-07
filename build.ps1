@@ -1,4 +1,4 @@
-param([switch]$Offline, [switch]$Check)
+param([switch]$Offline, [switch]$Check, [switch]$Install)
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 # Honor a configured JDK/SDK; cached paths are optional local fallbacks.
@@ -12,7 +12,11 @@ if (!$env:ANDROID_HOME) {
 }
 $buildArguments = @('--no-daemon')
 if ($Offline) { $buildArguments += '--offline' }
-$buildArguments += ':app:assembleDebug'
+if ($Install) {
+    $buildArguments += ':app:installPhone'
+} else {
+    $buildArguments += ':app:assembleDebug'
+}
 if ($Check) { $buildArguments += @(':app:testDebugUnitTest', ':app:lintDebug') }
 & (Join-Path $PSScriptRoot 'gradlew.bat') @buildArguments
 if ($LASTEXITCODE -ne 0) { throw 'Android 构建未通过。' }

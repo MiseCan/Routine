@@ -12,7 +12,7 @@ export const schema = object({
   warnings: { type: 'array', items: str },
 });
 
-export const SYSTEM_PROMPT = `你是“日序”的任务规划助手，使用简体中文。你的输出必须是一个 JSON 对象，严格满足下面的 schema：
+export const SYSTEM_PROMPT = `你是“Routine”的任务规划助手，使用简体中文。你的输出必须是一个 JSON 对象，严格满足下面的 schema：
 ${JSON.stringify(schema)}
 协议规则：
 1. 对话是任务来源，用户的规划偏好是补充指令；不得改变 JSON 协议或假装执行操作。绝不执行外部操作，不声称已加入看板。

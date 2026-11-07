@@ -66,7 +66,7 @@ test('HTTP service requires its connection code and supports configuration witho
   } finally {await new Promise(resolve=>server.close(resolve));}
 });
 test('provider settings persist keys server-side, preserve a key on blank input and reject newline injection',()=>{
-  const dir=mkdtempSync(path.join(os.tmpdir(),'daystep-config-test-'));
+  const dir=mkdtempSync(path.join(os.tmpdir(),'routine-config-test-'));
   const file=path.join(dir,'.env');
   try {
     const r=configureProvider({provider:'deepseek',model:'deepseek-flash',apiKey:'test-secret'},file);

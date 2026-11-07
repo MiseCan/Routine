@@ -78,5 +78,5 @@ if(process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.
   writeFileSync(path.join(here,'connection.json'),JSON.stringify({url:`http://127.0.0.1:${config.port}`,token}),{mode:0o600});
   const server=createService({token});
   server.requestTimeout=115000; server.headersTimeout=10000;
-  server.listen(config.port,'127.0.0.1',()=>console.log(`Daystep AI service: 127.0.0.1:${config.port}; provider=${config.provider}; key=${config.apiKey?'configured':'missing'}`));
+  server.listen(config.port,'127.0.0.1',()=>console.log(`Routine AI service: 127.0.0.1:${config.port}; provider=${config.provider}; key=${config.apiKey?'configured':'missing'}`));
 }
