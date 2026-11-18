@@ -6,8 +6,8 @@ android {
         applicationId = "com.routine"
         minSdk = 31
         targetSdk = 37
-        versionCode = 28
-        versionName = "0.16.2"
+        versionCode = 29
+        versionName = "0.16.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

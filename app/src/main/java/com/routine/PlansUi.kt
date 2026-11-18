@@ -4,6 +4,7 @@ package com.routine
 import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,30 +40,36 @@ fun completedStep(step:Step,note:String,at:String):Step {
     return step.copy(done=true,completions=step.completions+CompletionRecord(note.trim(),at))
 }
 
-@Composable internal fun AllPlans(steps:List<Step>,open:(String)->Unit,delete:(String)->Unit,header:(@Composable ()->Unit)?=null) {
-    var filter by rememberSaveable{mutableStateOf("进行中")}
-    var deleting by rememberSaveable{mutableStateOf<String?>(null)}
-    val target=steps.filter{planKey(it)==deleting}
-    if(target.isNotEmpty())MotionDialog(onDismissRequest={deleting=null},title={Text("删除计划？")},text={Text("将删除「${target.first().project}」及其全部 ${target.size} 项每日任务和完成记录，看板也会同步移除。此操作无法撤销。")},confirmLabel="删除",destructive=true,onConfirm={deleting?.let(delete);deleting=null})
-    val groups=remember(steps){steps.groupBy{planKey(it)}.values.sortedWith(compareBy<List<Step>>{it.all{step->step.done}}.thenBy{it.first().ddl})}
+@Composable internal fun DeletePlanDialog(steps:List<Step>,id:String,dismiss:()->Unit,delete:(String)->Unit) {
+    val target = steps.filter { planKey(it) == id }
+    if (target.isEmpty()) return
+    MotionDialog(onDismissRequest=dismiss,title={Text("删除计划？")},text={Text("将删除「${target.first().project}」及其全部 ${target.size} 项每日任务和完成记录，看板也会同步移除。此操作无法撤销。")},confirmLabel="删除",destructive=true,onConfirm={delete(id);dismiss()})
+}
+
+internal fun LazyListScope.allPlanItems(
+    steps: List<Step>,
+    filter: String,
+    selectFilter: (String) -> Unit,
+    open: (String) -> Unit,
+    requestDelete: (String) -> Unit,
+) {
+    val groups=steps.groupBy{planKey(it)}.values.sortedWith(compareBy<List<Step>>{it.all{step->step.done}}.thenBy{it.first().ddl})
     val shown=groups.filter{when(filter){"进行中"->it.any{step->!step.done};"已完成"->it.all{step->step.done};else->true}}
-        LazyColumn(Modifier.fillMaxSize(),contentPadding=PaddingValues(bottom=20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-            if(header!=null)item(key="plans:overview",contentType="overview"){header()}
-            item(key="plans:filters",contentType="filters"){FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)){listOf("进行中","已完成","全部").forEach{label->FilterChip(selected=filter==label,onClick={filter=label},label={Text(label)})}}}
-            if(shown.isEmpty())item{Text("暂无${if(filter=="全部")"" else filter}计划",color=MaterialTheme.colorScheme.onSurfaceVariant)}
-            items(shown,key={planKey(it.first())},contentType={"plan"}){items->
-                val done=items.count{it.done}
-                val interaction=remember{MutableInteractionSource()}
-                Card(onClick={open(planKey(items.first()))},interactionSource=interaction,modifier=Modifier.animateItem().motionPress(interaction),shape=RoundedCornerShape(24.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceContainer)){
-                    Column(Modifier.fillMaxWidth().padding(18.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
-                        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){Text(items.first().project,Modifier.weight(1f),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold);TextButton(shapes=ButtonDefaults.shapes(),onClick={deleting=planKey(items.first())}){Text("删除",color=MaterialTheme.colorScheme.error)}}
-                        Text("截止 ${items.first().ddl} · $done/${items.size} 项完成",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-                        MotionProgress(done.toFloat()/items.size,Modifier.fillMaxWidth().height(4.dp))
-                        items.filterNot{it.done}.minByOrNull{it.date}?.let{Text("下一步：${it.title}",style=MaterialTheme.typography.bodyMedium,maxLines=2)}
-                    }
-                }
+    item(key="plans:filters",contentType="filters"){FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp)){listOf("进行中","已完成","全部").forEach{label->FilterChip(selected=filter==label,onClick={selectFilter(label)},label={Text(label)})}}}
+    if(shown.isEmpty())item(key="plans:empty"){Text("暂无${if(filter=="全部")"" else filter}计划",color=MaterialTheme.colorScheme.onSurfaceVariant)}
+    items(shown,key={"plan:${planKey(it.first())}"},contentType={"plan"}){items->
+        val id = planKey(items.first())
+        val done=items.count{it.done}
+        val interaction=remember{MutableInteractionSource()}
+        Card(onClick={open(id)},interactionSource=interaction,modifier=Modifier.animateItem().motionPress(interaction),shape=RoundedCornerShape(24.dp),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceContainer)){
+            Column(Modifier.fillMaxWidth().padding(18.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
+                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){Text(items.first().project,Modifier.weight(1f),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold);TextButton(shapes=ButtonDefaults.shapes(),onClick={requestDelete(id)}){Text("删除",color=MaterialTheme.colorScheme.error)}}
+                Text("截止 ${items.first().ddl} · $done/${items.size} 项完成",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+                MotionProgress(done.toFloat()/items.size,Modifier.fillMaxWidth().height(4.dp))
+                items.filterNot{it.done}.minByOrNull{it.date}?.let{Text("下一步：${it.title}",style=MaterialTheme.typography.bodyMedium,maxLines=2)}
             }
         }
+    }
 }
 
 @Composable internal fun PlanDetail(items:List<Step>,toggle:(String)->Unit,update:(Step)->Unit,updatePlan:(String,String)->Unit) {
@@ -114,7 +121,7 @@ fun completedStep(step:Step,note:String,at:String):Step {
     }},onConfirm={if(step.done)save(step.copy(done=false))else save(completedStep(step,note,java.time.OffsetDateTime.now().toString()))},confirmEnabled=step.done||note.isNotBlank(),confirmLabel=if(step.done)"撤销完成" else "保存并完成",dismissLabel=if(step.done)"关闭" else "取消")
 }
 
-@Composable private fun StepEditor(step:Step,dismiss:()->Unit,save:(Step)->Unit) {
+@Composable internal fun StepEditor(step:Step,dismiss:()->Unit,save:(Step)->Unit) {
     var title by rememberSaveable(step.id){mutableStateOf(step.title)}
     var date by rememberSaveable(step.id){mutableStateOf(step.date)}
     var minutes by rememberSaveable(step.id){mutableStateOf(step.minutes.toString())}
@@ -151,7 +158,7 @@ fun completedStep(step:Step,note:String,at:String):Step {
     var promptOpen by rememberSaveable{mutableStateOf(false)}
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),verticalArrangement=Arrangement.spacedBy(20.dp)){
         SettingGroup("Routine",androidx.compose.material.icons.Icons.Default.Info){
-            Text("0.16.2",style=MaterialTheme.typography.headlineSmall)
+            Text("0.16.3",style=MaterialTheme.typography.headlineSmall)
             Text("通过 AI 对话识别任务和截止日期，补齐缺失信息，拆成每天可执行的行动。确认后的计划显示在看板。")
             Text("看板查看今日、待补做和后续任务；所有计划可查看进行中和已完成的计划，进入后可编辑每天的内容、日期、耗时和完成标准。")
             Text("“接下来”只显示明天的任务。删除计划需要确认，会同时移除其每日任务与完成记录。完成任务前需填写本次完成内容，计划详情的“完成记录”按实际完成日期展示。")

@@ -60,16 +60,16 @@ class PageNavigationTest {
 
     @Test fun peerTabsDoNotSlideOrShowBackAndEachRetainsItsDraft(){
         render()
-        val titleAtRest=x("页面-board")
         val contentAtRest=x("内容-board")
         ui.mainClock.autoAdvance=false
         changeWhileClockPaused{nav.openTopLevel("chat")}
         ui.mainClock.advanceTimeByFrame()
         ui.mainClock.advanceTimeBy(48)
-        assertEquals("Peer tabs must not use a nested-page horizontal offset",titleAtRest,x("页面-chat"),1f)
+        val incomingTitleX=x("页面-chat")
         assertEquals(contentAtRest,x("内容-chat"),1f)
         ui.onNodeWithContentDescription("返回").assertDoesNotExist()
         ui.mainClock.advanceTimeBy(1000)
+        assertEquals("Peer tabs must not use a nested-page horizontal offset",incomingTitleX,x("页面-chat"),1f)
         ui.mainClock.autoAdvance=true
         ui.onNodeWithTag("chat-draft").performTextInput("同级切换保留的草稿")
         ui.runOnIdle{nav.openTopLevel("board")}

@@ -94,7 +94,7 @@ class AndroidxAuditTest {
         ui.setContent{MaterialExpressiveTheme{
             val density=LocalDensity.current
             CompositionLocalProvider(LocalDensity provides Density(density.density,1.5f)){
-                Box(Modifier.requiredSize(320.dp,640.dp)){Board(tasks,today,{},{},{},{})}
+                Box(Modifier.requiredSize(320.dp,640.dp)){Board(tasks,today,{},{},{},{},{})}
             }
         }}
         ui.onNodeWithText("审查任务 1000").assertDoesNotExist()
@@ -108,7 +108,8 @@ class AndroidxAuditTest {
         val today=LocalDate.now().toString()
         val plans=(1..300).map{Step("p-$it","审查计划 ${it.toString().padStart(3,'0')}","测试行动",today,today,20,planId="p-$it")}
         var deleted:String?=null
-        ui.setContent{MaterialExpressiveTheme{AllPlans(plans,{},{deleted=it})}}
+        ui.setContent{MaterialExpressiveTheme{Board(plans,LocalDate.parse(today),{},{},{},{deleted=it},{})}}
+        ui.onNodeWithText("所有计划").performClick()
         capture("all-plans")
         ui.onNodeWithText("审查计划 300").assertDoesNotExist()
         ui.onNode(hasScrollAction()).performScrollToNode(hasText("审查计划 300"))

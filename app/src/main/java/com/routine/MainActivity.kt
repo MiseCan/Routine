@@ -90,6 +90,7 @@ internal fun decode(raw: String): List<Step> = runCatching {
     } else if (dark) darkColorScheme(primary = Color(0xFFB9CC9C), primaryContainer = Color(0xFF354D25), onPrimaryContainer = Color(0xFFDCEEC8), secondaryContainer = Color(0xFF3E4935), onSecondaryContainer = Color(0xFFE0E8D4), tertiaryContainer = Color(0xFF594431), onTertiaryContainer = Color(0xFFFFDEC2))
         else lightColorScheme(primary = Color(0xFF47652E), onPrimary = Color.White, primaryContainer = Color(0xFFC9EDA5), onPrimaryContainer = Color(0xFF142A05), secondaryContainer = Color(0xFFE0E8D4), tertiaryContainer = Color(0xFFFFDEC2), onTertiaryContainer = Color(0xFF3D2815), background = Color(0xFFF8FAF0), surface = Color(0xFFF8FAF0), surfaceContainer = Color(0xFFEEF2E5), surfaceContainerHigh = Color(0xFFE7EBDD))
     fun save(next: List<Step>) { store.saveSteps(next);planner.invalidatePlanPreview() }
+    fun updateStep(updated: Step) { save(steps.map { if (it.id == updated.id) updated else it }) }
     fun applyAiCommands(){
         val commands=planner.commandsForExecution(steps)?:return
         try{
@@ -138,10 +139,10 @@ internal fun decode(raw: String): List<Step> = runCatching {
                 onTitleClick=if(screen=="chat")({if(!ai.working)choosingChatPlan=true})else null,
                 actionEnabled=screen!="chat"||!ai.working){
                 when(screen){
-                    "board" -> Board(steps,today,{completionId=it},{controller.openTopLevel("chat")},{controller.openPlan(it)},{id->save(deletePlan(steps,id));planner.planDeleted(id)},boardRequest,boardDestination,boardNavigation)
+                    "board" -> Board(steps,today,{completionId=it},{controller.openTopLevel("chat")},{controller.openPlan(it)},{id->save(deletePlan(steps,id));planner.planDeleted(id)},::updateStep,boardRequest,boardDestination,boardNavigation)
                     "chat" -> key(ai.activeChatId){AiChatContent(planner,steps,::applyAiCommands){next->save(planner.mergeConfirmed(steps,next));planner.markConfirmed()}}
                     "about" -> AboutPage()
-                    "plan" -> PlanDetail(steps.filter{planKey(it)==planId},{completionId=it},{updated->save(steps.map{if(it.id==updated.id)updated else it})},{title,ddl->save(steps.map{if(planKey(it)==planId)it.copy(project=title,ddl=ddl,planId=planId,shortProject=if(title!=it.project)""else it.shortProject)else it})})
+                    "plan" -> PlanDetail(steps.filter{planKey(it)==planId},{completionId=it},::updateStep,{title,ddl->save(steps.map{if(planKey(it)==planId)it.copy(project=title,ddl=ddl,planId=planId,shortProject=if(title!=it.project)""else it.shortProject)else it})})
                     "settings" -> Settings(theme,store::setTheme,planner,dynamicColor,store::setDynamicColor,{controller.navigate("about")})
                 }
             }
@@ -169,7 +170,7 @@ internal fun decode(raw: String): List<Step> = runCatching {
                 Switch(checked=dynamicColor,onCheckedChange=setDynamicColor)
             }
         }
-        OutlinedCard(onClick=about,shape=RoundedCornerShape(24.dp),modifier=Modifier.fillMaxWidth()){Row(Modifier.fillMaxWidth().padding(20.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.Info,null);Text("关于",Modifier.weight(1f).padding(start=12.dp));Text("0.16.2")}}
+        OutlinedCard(onClick=about,shape=RoundedCornerShape(24.dp),modifier=Modifier.fillMaxWidth()){Row(Modifier.fillMaxWidth().padding(20.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Default.Info,null);Text("关于",Modifier.weight(1f).padding(start=12.dp));Text("0.16.3")}}
     }
 }
 

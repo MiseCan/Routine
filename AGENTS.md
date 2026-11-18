@@ -2,7 +2,7 @@
 
 项目名称统一为 **Routine**，Android applicationId 与 namespace 均为 **com.routine**，源码位于 `app/src/*/java/com/routine`。新增代码、资源、提示词、脚本和文档统一使用该名称与包名。
 
-常规构建使用 `build.ps1` 生成未经 R8 裁剪的全量包。推送到手机统一使用 `build.ps1 -Install`，它通过 `:app:installPhone` 构建并安装 R8 裁剪包，沿用现有调试签名以支持覆盖安装。
+默认使用 `build.ps1` 先生成未经 R8 裁剪的全量包，再通过 `:app:installPhone` 构建并覆盖安装同签名的 R8 裁剪包。只需构建全量包时使用 `build.ps1 -NoInstall`。
 
 项目约定更新（2026-11-06）：按用户明确要求，页面导航改用 `miuix-nav` 的 `NavDisplay` 和内置 `NavTransitions.MiuixDefault`，取代下文技术选型中的 Navigation Compose。不得恢复自行绘制的侧滑、遮罩和返回手势；看板与 AI 聊天保持同级，UI 组件继续使用 AndroidX Material 3 Expressive。
 

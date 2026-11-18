@@ -1,5 +1,9 @@
 # Routine动效
 
+## AndroidX 页面标题栏
+
+看板使用 Material 3 `MediumTopAppBar` 和 `exitUntilCollapsedScrollBehavior`，与 Purpose Gate 一致。上滑时标题收起到设置按钮所在行。AI 聊天、设置、关于和计划详情使用 `TopAppBar`。各页由 `Scaffold` 布局，标题栏随整个页面参与 Miuix 转场。下文 0.13.x 的自定义顶栏动效为历史记录。
+
 ## 0.15.0：Routine / com.routine
 
 应用显示名称、源码类型与命名空间、提醒 Action、私有偏好文件、密钥别名、AI 内置提示词、辅助脚本和本地工程名称统一为 Routine。Android applicationId 与 namespace 为 `com.routine`，源码目录为 `app/src/*/java/com/routine`，GitHub 仓库为 [MiseCan/Routine](https://github.com/MiseCan/Routine)。

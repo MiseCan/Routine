@@ -36,7 +36,7 @@ class LayoutRegressionTest {
     private fun tasks()=(1..60).map{Step("layout-$it","计划 $it","行动 $it","2026-11-06","2026-11-30",15,planId="layout-plan-$it")}
     private fun board(){
         ui.setContent{MaterialExpressiveTheme{RoutinePage("board","Routine",{},{},{}){
-            Board(tasks(),LocalDate.parse("2026-11-06"),{},{},{},{})
+            Board(tasks(),LocalDate.parse("2026-11-06"),{},{},{},{},{})
         }}}
     }
     private fun assertFullHeightViewport(){
@@ -48,8 +48,12 @@ class LayoutRegressionTest {
 
     @Test fun todayOverviewAndFiltersScrollAwayWithTasks(){
         board()
-        assertFullHeightViewport()
+        val settings = ui.onNodeWithContentDescription("设置")
+        val title = ui.onNodeWithText("Routine")
+        assertTrue(title.fetchSemanticsNode().boundsInRoot.center.y > settings.fetchSemanticsNode().boundsInRoot.bottom)
         ui.onNodeWithText("今日进度  0 / 60").assertIsDisplayed()
+        ui.onNode(hasScrollAction()).performTouchInput { swipeUp() }
+        assertEquals(settings.fetchSemanticsNode().boundsInRoot.center.y, title.fetchSemanticsNode().boundsInRoot.center.y, 2f)
         ui.onNode(hasScrollAction()).performScrollToNode(hasText("行动 40"))
         ui.onNodeWithText("行动 40").assertIsDisplayed()
         ui.onNodeWithText("今日进度  0 / 60").assertDoesNotExist()
@@ -61,11 +65,25 @@ class LayoutRegressionTest {
         board()
         ui.onNodeWithText("所有计划").performClick()
         ui.waitForIdle()
-        assertFullHeightViewport()
+        ui.onNode(hasScrollAction()).performTouchInput { swipeUp() }
         ui.onNode(hasScrollAction()).performScrollToNode(hasText("计划 40"))
         ui.onNodeWithText("计划 40").assertIsDisplayed()
         ui.onNodeWithText("今日进度  0 / 60").assertDoesNotExist()
         assertFullHeightViewport()
+    }
+
+    @Test fun taskTapShowsAndHidesDetails(){
+        val step = tasks().first().copy(definitionOfDone = "核对任务结果")
+        ui.setContent { MaterialExpressiveTheme {
+            Board(listOf(step), LocalDate.parse(step.date), {}, {}, {}, {}, {})
+        } }
+        val task = ui.onNodeWithText(step.title)
+        val details = ui.onNodeWithText("完成标准：核对任务结果")
+        details.assertDoesNotExist()
+        task.performTouchInput { click() }
+        details.assertIsDisplayed()
+        task.performTouchInput { click() }
+        details.assertDoesNotExist()
     }
 
     @Test fun keyboardInsetsAreAppliedOnceAndBottomNavigationDoesNotLeaveAGap(){

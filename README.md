@@ -4,7 +4,7 @@
 
 [下载与历史版本](https://github.com/MiseCan/Routine/releases)
 
-当前版本为 **Routine 0.16.2**，应用 ID 和源码命名空间均为 `com.routine`，签名相同时可覆盖升级 0.15.0。历史旧包名应用的计划、聊天和 API 密钥不会自动迁入。
+当前版本为 **Routine 0.16.3**，应用 ID 和源码命名空间均为 `com.routine`，签名相同时可覆盖升级 0.15.0。历史旧包名应用的计划、聊天和 API 密钥不会自动迁入。
 
 支持 Android 12（API 31）及以上。目前发布的是**调试签名的内测 APK**，尚未制作正式签名构建。
 
@@ -57,7 +57,7 @@ Windows：
 .\gradlew.bat :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
 ```
 
-全量包输出到 `app/build/outputs/apk/debug/app-debug.apk`。使用 `:app:assemblePhone` 构建 R8 裁剪包，输出到 `app/build/outputs/apk/phone/app-phone.apk`。Windows 上可运行 `./build.ps1 -Install` 构建并安装裁剪包。
+全量包输出到 `app/build/outputs/apk/debug/app-debug.apk`。使用 `:app:assemblePhone` 构建 R8 裁剪包，输出到 `app/build/outputs/apk/phone/app-phone.apk`。Windows 上运行 `./build.ps1` 会构建全量包，并向已连接的手机安装 R8 裁剪包。只需构建全量包时使用 `./build.ps1 -NoInstall`。
 
 ## 验证与参考
 
